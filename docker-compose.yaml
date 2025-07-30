@@ -8,17 +8,34 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
-      - backend
-      - honeypot
+      backend:
+        condition: service_healthy
+      honeypot:
+        condition: service_healthy
+    restart: unless-stopped
 
   backend:
     build: ./backend
     container_name: saas-backend
     expose:
       - "5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
 
   honeypot:
     build: ./honeypot
     container_name: honeypot-service
     expose:
       - "6000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped

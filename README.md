@@ -48,11 +48,11 @@ This project demonstrates a **secure SaaS platform** with:
 ```
 secure-saas-platform/
 │
-├── docker-compose.yml         # Compose file for all services
+├── docker-compose.yaml         # Compose file for all services
 │
 ├── nginx/
 │   ├── nginx.conf             # Nginx reverse proxy with PKI auth
-│   ├── certs/                 # PKI certificates (generated later)
+│   ├── certs/                 # PKI certificates (generated here)
 │
 ├── backend/
 │   ├── Dockerfile
@@ -64,32 +64,44 @@ secure-saas-platform/
 │   ├── honeypot.py            # Honeypot Flask app
 │   ├── requirements.txt
 │
-└── scripts/
-    ├── generate_certs.sh      # PKI certificate generation script
+├── scripts/
+│   └── generate_certs.sh      # (Legacy) PKI certificate generation script
+│
+├── fix_certificates.sh        # Recommended cross-platform certificate script
+└── README.md
 ```
 
 ---
 
 ## **Setup & Run**
 
-### **1. Clone the Repository**
+### **1. Generate PKI Certificates**
+
+> **Recommended:** Use the provided `fix_certificates.sh` for best compatibility (especially on Windows).
+
 ```bash
-git clone https://github.com/<your-username>/secure-saas-pki-honeypot.git
-cd secure-saas-platform
+chmod +x fix_certificates.sh
+./fix_certificates.sh
 ```
 
-### **2. Generate PKI Certificates**
+This will generate all necessary certificates in `nginx/certs/`.
+
+---
+
+### **2. Build and Start Containers**
+
 ```bash
-cd scripts
-chmod +x generate_certs.sh
-./generate_certs.sh
-cd ..
+docker-compose up --build -d
 ```
 
-### **3. Build and Start Containers**
+---
+
+### **3. Check Container Status**
+
 ```bash
-docker-compose up --build
+docker ps
 ```
+You should see `nginx-proxy`, `saas-backend`, and `honeypot-service` running and healthy.
 
 ---
 
@@ -101,36 +113,46 @@ Use curl with the generated client certificate:
 curl -k --cert nginx/certs/client.crt --key nginx/certs/client.key https://localhost/api/tenant1
 ```
 
-### **B. Access without Certificate**
-This triggers the honeypot:
+### **B. Access without Certificate (Triggers Honeypot)**
 ```bash
 curl -k https://localhost/
 ```
 
-Check honeypot logs:
+### **C. Check Honeypot Logs**
+To see the latest honeypot activity:
 ```bash
-docker exec -it honeypot-service cat honeypot.log
+docker exec honeypot-service tail -20 honeypot.log
+```
+To watch logs live:
+```bash
+docker exec -it honeypot-service tail -f honeypot.log
 ```
 
 ---
 
 ## **PKI Certificates**
-The script `scripts/generate_certs.sh` creates:
-- `ca.crt` and `ca.key` – Certificate Authority.
-- `server.crt` and `server.key` – Nginx server cert.
-- `client.crt` and `client.key` – Client cert for testing.
+- `fix_certificates.sh` creates:
+  - `ca.crt` and `ca.key` – Certificate Authority
+  - `server.crt` and `server.key` – Nginx server cert
+  - `client.crt` and `client.key` – Client cert for testing
 
 ---
 
 ## **Technologies Used**
-- Docker & Docker Compose – Containerization.
-- Flask (Python) – SaaS backend & honeypot service.
-- Nginx – Reverse proxy with mutual TLS.
-- OpenSSL – PKI certificate generation.
+- Docker & Docker Compose – Containerization
+- Flask (Python) – SaaS backend & honeypot service
+- Nginx – Reverse proxy with mutual TLS
+- OpenSSL – PKI certificate generation
 
 ---
 
 ## **Future Improvements**
-- Add rate limiting and IP banning.
-- Deploy to Kubernetes with secrets management.
-- Add real analytics and dashboards for honeypot logs. 
+- Add rate limiting and IP banning
+- Deploy to Kubernetes with secrets management
+- Add real analytics and dashboards for honeypot logs
+
+---
+
+## **Troubleshooting**
+- If you see errors running `fix_certificates.sh` on Windows, try using WSL (Windows Subsystem for Linux) or run the script on a Linux machine for best compatibility.
+- For any issues with Docker networking or permissions, ensure Docker Desktop is running and you have the necessary privileges.
