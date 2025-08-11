@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration - Secure SaaS Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .registration-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 50px auto;
+            max-width: 500px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .form-container {
+            padding: 40px;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .tenant-select {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .step.active {
+            background: #667eea;
+            color: white;
+        }
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="registration-container">
+            <div class="header">
+                <h2><i class="fas fa-user-plus"></i> User Registration</h2>
+                <p class="mb-0">Join the Secure SaaS Platform</p>
+            </div>
+            
+            <div class="form-container">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active" id="step1">1</div>
+                    <div class="step" id="step2">2</div>
+                    <div class="step" id="step3">3</div>
+                </div>
+
+                <!-- Step 1: Basic Information -->
+                <div id="step1-content">
+                    <h4 class="mb-4">Basic Information</h4>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username *</label>
+                        <input type="text" class="form-control" id="username" placeholder="Enter username" required>
+                        <div class="form-text">Username must be unique and contain only letters, numbers, and underscores.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address *</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter email address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" placeholder="Enter first name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" placeholder="Enter last name">
+                    </div>
+                    <button type="button" class="btn btn-register btn-lg w-100" onclick="nextStep()">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Step 2: Tenant Selection -->
+                <div id="step2-content" style="display: none;">
+                    <h4 class="mb-4">Select Your Organization</h4>
+                    <div class="tenant-select">
+                        <h6><i class="fas fa-building"></i> Available Organizations</h6>
+                        <div id="tenant-list">
+                            <!-- Tenants will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role *</label>
+                        <select class="form-control" id="role" required>
+                            <option value="">Select a role</option>
+                            <option value="user">User</option>
+                            <option value="viewer">Viewer</option>
+                            <option value="admin">Administrator</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-lg flex-fill" onclick="prevStep()">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-register btn-lg flex-fill" onclick="nextStep()">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Review & Submit -->
+                <div id="step3-content" style="display: none;">
+                    <h4 class="mb-4">Review & Submit</h4>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6>Registration Summary</h6>
+                            <div id="registration-summary">
+                                <!-- Summary will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" onclick="showTerms()">Terms of Service</a> and <a href="#" onclick="showPrivacy()">Privacy Policy</a>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-lg flex-fill" onclick="prevStep()">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn btn-register btn-lg flex-fill" onclick="submitRegistration()" id="submit-btn">
+                            <i class="fas fa-check"></i> Complete Registration
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" style="display: none; text-align: center;">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Processing your registration...</p>
+                </div>
+
+                <!-- Success State -->
+                <div id="success-state" style="display: none; text-align: center;">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-check-circle fa-3x"></i>
+                    </div>
+                    <h4>Registration Successful!</h4>
+                    <p>Your account has been created successfully. You will receive an email with your certificate files.</p>
+                    <div class="alert alert-info">
+                        <strong>Next Steps:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Download your client certificate and private key</li>
+                            <li>Import the certificate into your browser or application</li>
+                            <li>Access the platform using your new credentials</li>
+                        </ul>
+                    </div>
+                    <a href="/" class="btn btn-primary">Go to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStep = 1;
+        let registrationData = {};
+
+        // Load tenants on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTenants();
+        });
+
+        function loadTenants() {
+            fetch('/api/tenants')
+                .then(response => response.json())
+                .then(tenants => {
+                    const tenantList = document.getElementById('tenant-list');
+                    tenantList.innerHTML = '';
+                    
+                    tenants.forEach(tenant => {
+                        const tenantDiv = document.createElement('div');
+                        tenantDiv.className = 'form-check mb-2';
+                        tenantDiv.innerHTML = `
+                            <input class="form-check-input" type="radio" name="tenant" id="tenant${tenant.id}" value="${tenant.id}" required>
+                            <label class="form-check-label" for="tenant${tenant.id}">
+                                <strong>${tenant.name}</strong> (${tenant.plan} plan)
+                            </label>
+                        `;
+                        tenantList.appendChild(tenantDiv);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading tenants:', error);
+                    document.getElementById('tenant-list').innerHTML = '<p class="text-danger">Error loading organizations</p>';
+                });
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                if (!validateStep1()) return;
+                saveStep1Data();
+            } else if (currentStep === 2) {
+                if (!validateStep2()) return;
+                saveStep2Data();
+            }
+            
+            if (currentStep < 3) {
+                currentStep++;
+                showStep(currentStep);
+                updateStepIndicator();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+                updateStepIndicator();
+            }
+        }
+
+        function showStep(step) {
+            document.getElementById('step1-content').style.display = 'none';
+            document.getElementById('step2-content').style.display = 'none';
+            document.getElementById('step3-content').style.display = 'none';
+            
+            document.getElementById(`step${step}-content`).style.display = 'block';
+            
+            if (step === 3) {
+                populateSummary();
+            }
+        }
+
+        function updateStepIndicator() {
+            for (let i = 1; i <= 3; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                if (i < currentStep) {
+                    stepElement.className = 'step completed';
+                } else if (i === currentStep) {
+                    stepElement.className = 'step active';
+                } else {
+                    stepElement.className = 'step';
+                }
+            }
+        }
+
+        function validateStep1() {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            if (!username || !email) {
+                alert('Please fill in all required fields.');
+                return false;
+            }
+            
+            if (username.length < 3) {
+                alert('Username must be at least 3 characters long.');
+                return false;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function validateStep2() {
+            const selectedTenant = document.querySelector('input[name="tenant"]:checked');
+            const role = document.getElementById('role').value;
+            
+            if (!selectedTenant) {
+                alert('Please select an organization.');
+                return false;
+            }
+            
+            if (!role) {
+                alert('Please select a role.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function saveStep1Data() {
+            registrationData.username = document.getElementById('username').value.trim();
+            registrationData.email = document.getElementById('email').value.trim();
+            registrationData.firstName = document.getElementById('firstName').value.trim();
+            registrationData.lastName = document.getElementById('lastName').value.trim();
+        }
+
+        function saveStep2Data() {
+            const selectedTenant = document.querySelector('input[name="tenant"]:checked');
+            registrationData.tenant_id = parseInt(selectedTenant.value);
+            registrationData.role = document.getElementById('role').value;
+        }
+
+        function populateSummary() {
+            const summary = document.getElementById('registration-summary');
+            summary.innerHTML = `
+                <p><strong>Username:</strong> ${registrationData.username}</p>
+                <p><strong>Email:</strong> ${registrationData.email}</p>
+                <p><strong>Name:</strong> ${registrationData.firstName} ${registrationData.lastName}</p>
+                <p><strong>Role:</strong> ${registrationData.role}</p>
+                <p><strong>Organization ID:</strong> ${registrationData.tenant_id}</p>
+            `;
+        }
+
+        function submitRegistration() {
+            if (!document.getElementById('terms').checked) {
+                alert('Please agree to the Terms of Service and Privacy Policy.');
+                return;
+            }
+            
+            // Show loading state
+            document.getElementById('step3-content').style.display = 'none';
+            document.getElementById('loading-state').style.display = 'block';
+            
+            // Submit registration
+            fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: registrationData.username,
+                    email: registrationData.email,
+                    tenant_id: registrationData.tenant_id,
+                    role: registrationData.role
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    // Show success state
+                    document.getElementById('loading-state').style.display = 'none';
+                    document.getElementById('success-state').style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Registration failed');
+                }
+            })
+            .catch(error => {
+                alert('Registration failed: ' + error.message);
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('step3-content').style.display = 'block';
+            });
+        }
+
+        function showTerms() {
+            alert('Terms of Service would be displayed here.');
+        }
+
+        function showPrivacy() {
+            alert('Privacy Policy would be displayed here.');
+        }
+    </script>
+</body>
+</html>
